@@ -29,6 +29,8 @@
   affect shared contracts or release behavior.
 - Prefer test output, typechecks, builds, diffs, logs, and runtime checks over a
   model's self-review.
+- Fix a failed required check and rerun it. Do not accept a model's claim that the
+  failure is harmless.
 - Report verification that did not run or did not pass.
 
 ## Performance
