@@ -51,6 +51,8 @@ Return: conclusion, evidence, changed files, checks, uncertainty
   cost.
 - Use two workers by default for parallel work. Use more only for independent
   lanes with clear ownership.
+- Select the model per lane. Parallel workers may use multiple instances of the
+  same model, including Sol, when each lane needs that model's judgment.
 - Verify worker output before integration.
 - Keep one writer per mutable worktree and one owner of the integration worktree.
 - Do not let two harnesses coordinate the same task.

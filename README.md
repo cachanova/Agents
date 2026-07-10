@@ -41,3 +41,10 @@ When updating a project, copy the shared files again without replacing its
 Keep each rule in one file. Use short commands, define project facts in
 `Repo.md`, and avoid rationale unless it changes a decision. Update
 `Glossary.md` when a term needs a stable meaning across files.
+
+## Claude bridge for Codex
+
+`tools/claude-bridge` provides a local MCP server that lets Codex start, inspect,
+follow up on, recover, and cancel delegated Claude Code sessions. It defaults to
+Fable at high effort, read-only plan mode, disabled web tools, and Claude
+subscription authentication. See its README for installation and controls.
