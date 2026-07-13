@@ -1,37 +1,34 @@
 # Claude Harness Mode
 
-This file applies to a root Claude Code session. Fable is the default coordinator.
-If another model is active, it is the root coordinator and must identify itself
-rather than claiming to be Fable.
+This file applies to a root Claude Code session. Fable is the default
+coordinator. If another model is active, `ModelRouting.md` must permit it before
+it coordinates. The active coordinator must identify itself rather than
+claiming to be Fable.
 
 ## Coordinator duties
 
 The root coordinator owns the plan, worker assignments, integration,
 verification, git state, release workflow, and user communication. Spend Fable
-context on ambiguous decisions, architecture, and synthesis. Delegate bulk
-reading, routine execution, and bounded implementation.
+context on coordination, ambiguous decisions, architecture, and synthesis.
+Delegate implementation to Codex Sol at `high` by default.
 
 ## Routing
 
-| Work | Model | Effort |
-| --- | --- | --- |
-| Coordination and deep analysis | Fable | `high` |
-| Hard architecture or root-cause investigation | Fable | `xhigh` |
-| Exceptional frontier problem with a narrow stop condition | Fable | `max` |
-| Repository discovery, bounded implementation, tests, docs | Terra | `medium` or `high` |
-| Difficult terminal work, debugging, or implementation | Sol | `high` or `xhigh` |
-| Mechanical search, extraction, classification, transformation | Luna | `low` or `medium` |
-| Independent implementation review | Sol | `high` |
+Apply the ladder and exclusions in `ModelRouting.md`. Fable owns root
+coordination in this mode. Use Sol at `high` for implementation and other
+nontrivial delegated work unless a bounded assignment meets the Terra or Opus
+boundary. Keep work in Fable when it needs top-tier reasoning or root-level
+integration.
 
-Use the cheapest model that can meet the acceptance criteria. Fable may perform a
-trivial direct edit when delegation would cost more than the work.
+## Workers
 
-## Codex workers
+Use the official Codex plugin or another maintained Codex interface. Send the
+assignment envelope from `Delegation.md`. The current plugin may expose fewer
+effort values than Codex itself; use its supported values rather than emulating
+`max` or Ultra.
 
-Use the official Codex plugin or another maintained Codex interface. Mark every
-request `DELEGATED_TASK` and specify the model, scope, verification, and git
-authority. The current plugin may expose fewer effort values than Codex itself;
-use its supported values rather than emulating `max` or Ultra.
+For a native Claude worker, select `opus` or `fable` rather than inheriting an
+unspecified model. Apply the tier boundary before assigning the worker.
 
 ## Context control
 
@@ -46,4 +43,4 @@ Use Claude ultracode only for separable work permitted by `Worktree.md` and
 it does not change the coordinator.
 
 Switch to Codex Harness Mode only through an explicit handoff. Do not switch
-merely because Sol supplied a worker result.
+because Sol or Opus supplied a worker result.

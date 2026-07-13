@@ -30,3 +30,5 @@ Record only facts and rules specific to this project. Do not repeat shared polic
 ## Special rules
 
 - Add explicit project-specific behavior or shared-policy specializations here.
+  A specialization may narrow model routing but must not allow a model excluded
+  by `ModelRouting.md`.

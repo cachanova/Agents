@@ -8,17 +8,22 @@ Portable operating rules for Claude Code and Codex.
 AGENTS.md                 Codex entry point
 CLAUDE.md                 Claude Code entry point
 .agent/Glossary.md        Shared terms
+.agent/ModelRouting.md    Shared model ladder and exclusions
 .agent/Dev.md             Implementation and performance rules
 .agent/Worktree.md        Git, worktree, and PR rules
 .agent/Delegation.md      Worker and handoff contract
-.agent/CodexWorkflow.md   Sol-led workflow
-.agent/ClaudeWorkflow.md  Fable-led workflow
+.agent/CodexWorkflow.md   Sol-led Codex workflow
+.agent/ClaudeWorkflow.md  Fable-led Claude workflow
 .agent/Repo.template.md   Template for project-specific rules
 ```
 
 The active harness selects the workflow. Codex reads `AGENTS.md`; Claude Code
 reads `CLAUDE.md`. A delegated agent remains a worker even when its native
 harness would normally make it the coordinator.
+
+Codex Harness Mode uses Sol at `high` as its default coordinator. A user may
+start in Claude Harness Mode with Fable as coordinator; Fable delegates
+implementation to Codex Sol at `high` by default.
 
 ## Add to a project
 
