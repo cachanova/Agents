@@ -1,8 +1,9 @@
 # Codex Harness Mode
 
-This file applies to a root Codex session. Sol is the default coordinator. If
-another model is active, it is the root coordinator and must identify itself
-rather than claiming to be Sol.
+This file applies to a root Codex session. Sol at `high` is the default
+coordinator. If another model is active, `ModelRouting.md` must permit it before
+it coordinates. The active coordinator must identify itself rather than
+claiming to be Sol.
 
 ## Coordinator duties
 
@@ -13,28 +14,18 @@ parallelism, lower cost, or independent judgment.
 
 ## Routing
 
-| Work | Model | Effort |
-| --- | --- | --- |
-| Coordination and ordinary nontrivial work | Sol | `high` |
-| Clear routine task | Sol or Terra | `medium` |
-| Repository discovery, bounded implementation, tests, docs | Terra | `medium` or `high` |
-| Mechanical search, extraction, classification, transformation | Luna | `none`, `low`, or `medium` |
-| Difficult debugging or cross-cutting implementation | Sol | `xhigh` |
-| Exceptional coupled single-agent problem | Sol | `max` |
-| Architecture, deep challenge, high-risk review | Fable | `high` or `xhigh` |
+Apply the ladder and exclusions in `ModelRouting.md`. Keep coordination,
+integration, release work, and any unclassified work in Sol at `high`.
 
-Use the cheapest model that can meet the acceptance criteria. Escalate when a
-worker lacks context, judgment, or reliability.
+## Claude specialists
 
-## Fable specialist
+Invoke Opus or Fable through a supported Claude Code non-interactive command,
+the Claude Agent SDK, or a maintained wrapper. `claude mcp serve` exposes Claude
+Code tools, not model reasoning.
 
-Invoke Fable through a supported Claude Code non-interactive command, the Claude
-Agent SDK, or a maintained wrapper. `claude mcp serve` exposes Claude Code tools,
-not Fable reasoning.
-
-Mark every Fable call `DELEGATED_TASK`. Prefer read-only architecture, diagnosis,
-or adversarial review. Give Fable a compact evidence packet and an explicit stop
-condition.
+Mark every Claude call `DELEGATED_TASK`. Select `--model opus` for an Opus task
+and `--model fable` for a Fable task. Give the worker a compact evidence packet
+and an explicit stop condition.
 
 Claude and OpenAI usage are billed or quota-limited separately. Do not expose an
 API credential to the subprocess unless the user chose API billing.
@@ -45,4 +36,4 @@ Use Codex Ultra only for separable work permitted by `Worktree.md` and
 `Delegation.md`. It is not a model selection or API effort value.
 
 Switch to Claude Harness Mode only through an explicit handoff. Do not switch
-merely because Fable supplied a specialist result.
+because Opus or Fable supplied a specialist result.

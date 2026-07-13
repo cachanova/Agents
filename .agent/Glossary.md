@@ -4,8 +4,9 @@ Use these terms consistently.
 
 - **Harness:** The application running a session and controlling its tools,
   context, permissions, and agents.
-- **Mode:** The workflow selected by the root harness. Claude Harness Mode uses
-  Fable by default. Codex Harness Mode uses Sol by default.
+- **Mode:** The workflow selected by the root harness. Codex Harness Mode uses
+  Sol at `high` by default. Claude Harness Mode uses Fable by default and may
+  delegate implementation to Codex Sol.
 - **Root coordinator:** The model that owns the task plan, delegation,
   integration, verification, git state, and user communication. Each task has
   one root coordinator.
@@ -31,12 +32,12 @@ Use these terms consistently.
 
 ## Models
 
-- **Fable:** `claude-fable-5`
 - **Sol:** `gpt-5.6-sol`
 - **Terra:** `gpt-5.6-terra`
-- **Luna:** `gpt-5.6-luna`
+- **Opus:** `claude-opus-4-8`
+- **Fable:** `claude-fable-5`
 
-The active workflow assigns their roles.
+`ModelRouting.md` assigns their roles and names excluded models.
 
 ## Effort terms
 

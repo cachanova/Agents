@@ -18,6 +18,7 @@
 Give each worker:
 
 - the objective and required output;
+- the selected model and effort;
 - read or write scope;
 - relevant constraints and known evidence;
 - verification to run;
@@ -30,6 +31,8 @@ DELEGATED_TASK
 Parent harness: Claude | Codex
 Root coordinator: active model
 Role: worker role
+Model: selected model
+Effort: selected effort
 Write scope: read-only | paths
 Git authority: none
 Objective: requested result
