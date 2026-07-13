@@ -7,13 +7,16 @@ credentials.
 ## Contract
 
 - The bridge defaults to Fable at `high` effort. It supports `fable`,
-  `claude-fable-5`, `opus`, and `sonnet`, with efforts from `low` through `max`.
+  `claude-fable-5`, and `opus`, with efforts from `low` through `max`.
 - The bridge restricts jobs to `Read`, `Glob`, and `Grep`.
 - Set `allow_web: true` on each job that needs web tools. Repository content can
   then inform web requests.
 - Claude's `--safe-mode` disables local customizations. Each start supplies a
   trusted `policy_root`; the bridge attaches regular non-symlink `CLAUDE.md` and
-  shared `.agent/` files from that root. `cwd` must be inside it.
+  shared `.agent/` files from that root, including `ModelRouting.md`.
+- For a workspace containing sibling worktrees, set `workspace_root` to their
+  parent and `repo_policy_file` to the project's regular `Repo.md`. Both
+  `policy_root` and `cwd` must be inside `workspace_root`.
 - The bridge sends prompts over stdin and passes a small environment allowlist
   for keyring-based subscription login.
 - The bridge forks finished sessions for follow-ups. It cannot steer a running

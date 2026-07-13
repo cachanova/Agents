@@ -28,7 +28,7 @@ import {
 } from "./lib.mjs";
 
 const execFileAsync = promisify(execFile);
-const modelSchema = z.enum(["fable", "claude-fable-5", "opus", "sonnet"]);
+const modelSchema = z.enum(["fable", "claude-fable-5", "opus"]);
 const effortSchema = z.enum(["low", "medium", "high", "xhigh", "max"]);
 const metadataSchema = z.string()
   .trim()
@@ -96,7 +96,10 @@ async function startRequest(input, resumeSessionId = null, parentJobId = null) {
     throw new Error("Claude subscription login is required; API and third-party billing are disabled.");
   }
   const cwd = await assertWorkingDirectory(input.cwd);
-  const policy = await loadPolicyPacket(cwd, input.policy_root);
+  const policy = await loadPolicyPacket(cwd, input.policy_root, {
+    workspaceRoot: input.workspace_root,
+    repoPolicyFile: input.repo_policy_file
+  });
   const firstLine = input.prompt.trim().split(/\r?\n/, 1)[0].trim();
   return createJob({
     cwd,
@@ -111,6 +114,8 @@ async function startRequest(input, resumeSessionId = null, parentJobId = null) {
     parent_job_id: parentJobId,
     resume_session_id: resumeSessionId,
     policy_root: policy.root,
+    workspace_root: policy.workspaceRoot,
+    repo_policy_file: policy.repoPolicyFile,
     policy_files: policy.files,
     policy_text: policy.text,
     delegated_prompt: buildDelegatedPrompt({
@@ -174,11 +179,13 @@ server.registerTool("claude_health", {
 });
 
 server.registerTool("claude_start", {
-  description: "Start a detached, subscription-only, read-only Claude specialist job. policy_root explicitly trusts the portable CLAUDE.md/.agent packet. Network tools are disabled unless allow_web is true.",
+  description: "Start a detached, subscription-only, read-only Claude specialist job. policy_root trusts the shared regular-file packet; workspace_root and repo_policy_file may compose project policy for sibling worktrees. Network tools are disabled unless allow_web is true.",
   inputSchema: {
     prompt: z.string().min(1).max(190_000),
     cwd: z.string().min(1),
-    policy_root: z.string().min(1).describe("Trusted directory containing CLAUDE.md and .agent/; cwd must be inside it"),
+    policy_root: z.string().min(1).describe("Trusted regular-file directory containing shared CLAUDE.md and .agent/ policy"),
+    workspace_root: z.string().min(1).optional().describe("Trusted workspace containing policy_root and cwd; defaults to policy_root"),
+    repo_policy_file: z.string().min(1).optional().describe("Regular project Repo.md inside workspace_root; defaults to policy_root/.agent/Repo.md when present"),
     label: labelSchema.optional(),
     model: modelSchema.default("fable"),
     effort: effortSchema.default("high"),
@@ -219,6 +226,8 @@ server.registerTool("claude_reply", {
       prompt: input.prompt,
       cwd: previous.cwd,
       policy_root: previous.policy_root,
+      workspace_root: previous.workspace_root,
+      repo_policy_file: previous.repo_policy_file,
       label: input.label || `Follow-up: ${previous.label}`.slice(0, 120),
       model: previous.model,
       effort: input.effort || previous.effort,

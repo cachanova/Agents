@@ -24,15 +24,16 @@ const LOCK_HOLDER_PATH = path.join(HERE, "lock-holder.mjs");
 const REQUIRED_POLICY_FILES = [
   "CLAUDE.md",
   ".agent/Glossary.md",
+  ".agent/ModelRouting.md",
   ".agent/Dev.md",
   ".agent/Worktree.md",
   ".agent/Delegation.md",
   ".agent/ClaudeWorkflow.md"
 ];
 const POLICY_FILES = [
-  ...REQUIRED_POLICY_FILES.slice(0, 4),
+  ...REQUIRED_POLICY_FILES.slice(0, 5),
   ".agent/Repo.md",
-  ...REQUIRED_POLICY_FILES.slice(4)
+  ...REQUIRED_POLICY_FILES.slice(5)
 ];
 const SAFE_ENV_KEYS = [
   "HOME",
@@ -293,8 +294,11 @@ export function buildDelegatedPrompt({ prompt, rootCoordinator, role, verificati
   return text;
 }
 
-async function readPolicyFile(root, relative, required) {
-  const filePath = path.join(root, relative);
+function isInside(root, candidate) {
+  return candidate === root || candidate.startsWith(`${root}${path.sep}`);
+}
+
+async function readPolicyPath(root, filePath, required) {
   let handle;
   let info;
   try {
@@ -323,24 +327,47 @@ async function readPolicyFile(root, relative, required) {
   }
 }
 
-export async function loadPolicyPacket(cwd, policyRoot) {
+async function readPolicyFile(root, relative, required) {
+  return readPolicyPath(root, path.join(root, relative), required);
+}
+
+export async function loadPolicyPacket(cwd, policyRoot, {
+  workspaceRoot = null,
+  repoPolicyFile = null
+} = {}) {
   const root = await assertWorkingDirectory(policyRoot);
-  if (cwd !== root && !cwd.startsWith(`${root}${path.sep}`)) {
-    throw new Error(`cwd must be inside the explicit policy_root: ${root}`);
+  const workspace = await assertWorkingDirectory(workspaceRoot || root);
+  if (!isInside(workspace, root)) {
+    throw new Error(`policy_root must be inside the explicit workspace_root: ${workspace}`);
+  }
+  if (!isInside(workspace, cwd)) {
+    throw new Error(`cwd must be inside the explicit workspace_root: ${workspace}`);
   }
   const required = new Set(REQUIRED_POLICY_FILES);
   const sections = [];
   const loaded = [];
+  const requestedRepoPolicy = repoPolicyFile
+    ? path.resolve(workspace, repoPolicyFile)
+    : path.join(root, ".agent", "Repo.md");
+  const repoPolicy = await readPolicyPath(workspace, requestedRepoPolicy, Boolean(repoPolicyFile));
   let total = 0;
   for (const relative of POLICY_FILES) {
-    const policy = await readPolicyFile(root, relative, required.has(relative));
+    const policy = relative === ".agent/Repo.md"
+      ? repoPolicy
+      : await readPolicyFile(root, relative, required.has(relative));
     if (!policy) continue;
     total += policy.content.length;
     if (total > 120_000) throw new Error("Repository policy packet exceeds 120,000 characters.");
     loaded.push(policy.filePath);
     sections.push(`# Policy source: ${policy.filePath}\n\n${policy.content.trim()}`);
   }
-  return { root, files: loaded, text: sections.join("\n\n") };
+  return {
+    root,
+    workspaceRoot: workspace,
+    repoPolicyFile: repoPolicy?.filePath || null,
+    files: loaded,
+    text: sections.join("\n\n")
+  };
 }
 
 export function safeClaudeEnvironment(source = process.env) {

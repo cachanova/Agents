@@ -27,19 +27,35 @@ implementation to Codex Sol at `high` by default.
 
 ## Add to a project
 
-Copy `AGENTS.md`, `CLAUDE.md`, and `.agent/` to the project workspace root. The
-workspace root may be a repository checkout or a container that holds a bare
-repository and its worktrees.
+For a bare-repository workspace with sibling worktrees, add this repository as
+an `.agents` submodule in the main worktree. Keep the project's regular
+`.agent/Repo.md` outside the submodule and version it in the project repository.
+Only the main worktree maintains a persistent submodule checkout.
 
-Policy paths resolve from the copied entrypoint's directory, so sessions may work
-inside child worktrees after loading the workspace entrypoint.
+Expose the main worktree's pinned packet at the parent workspace root:
 
-Rename `.agent/Repo.template.md` to `.agent/Repo.md`, then record the project's
-layout, commands, secrets source, verification, and release process. Keep
-`Repo.md` local to that project.
+```text
+workspace/
+  AGENTS.md -> main/.agents/AGENTS.md
+  CLAUDE.md -> main/.agents/CLAUDE.md
+  .agent/
+    Glossary.md -> ../main/.agents/.agent/Glossary.md
+    ModelRouting.md -> ../main/.agents/.agent/ModelRouting.md
+    Dev.md -> ../main/.agents/.agent/Dev.md
+    Worktree.md -> ../main/.agents/.agent/Worktree.md
+    Repo.md -> ../main/.agent/Repo.md
+    Delegation.md -> ../main/.agents/.agent/Delegation.md
+    CodexWorkflow.md -> ../main/.agents/.agent/CodexWorkflow.md
+    ClaudeWorkflow.md -> ../main/.agents/.agent/ClaudeWorkflow.md
+```
 
-When updating a project, copy the shared files again without replacing its
-`Repo.md`. Updates are manual by design.
+Codex sessions should start from the parent workspace. If direct worktree
+launches must remain safe, track a small worktree `AGENTS.md` that redirects the
+agent to `../AGENTS.md`; do not duplicate the shared policy there.
+
+An application pins policy updates by updating its `.agents` gitlink. A
+dedicated policy-update worktree may initialize the submodule temporarily, but
+feature worktrees leave it uninitialized.
 
 ## Editing
 

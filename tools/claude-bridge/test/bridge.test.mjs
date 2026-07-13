@@ -88,6 +88,10 @@ test("MCP bridge enforces the read-only subscription contract and job lifecycle"
       startTool.inputSchema.properties.effort.enum,
       ["low", "medium", "high", "xhigh", "max"]
     );
+    assert.deepEqual(
+      startTool.inputSchema.properties.model.enum,
+      ["fable", "claude-fable-5", "opus"]
+    );
 
     const health = await call(client, "claude_health");
     assert.equal(health.value.ok, true);
@@ -224,6 +228,52 @@ test("active job reservations are capped across MCP server processes", async () 
   }
 });
 
+test("composed workspace policy loads shared files and a separate Repo.md", async () => {
+  const workspaceRoot = await mkdtemp(path.join(os.tmpdir(), "claude-bridge-workspace-test-"));
+  const policyRoot = path.join(workspaceRoot, "main", ".agents");
+  const repoPolicyFile = path.join(workspaceRoot, "main", ".agent", "Repo.md");
+  const cwd = path.join(workspaceRoot, "feature-worktree");
+  await mkdir(path.join(policyRoot, ".agent"), { recursive: true });
+  await mkdir(path.dirname(repoPolicyFile), { recursive: true });
+  await mkdir(cwd);
+  const policyFiles = [
+    "CLAUDE.md",
+    ".agent/Glossary.md",
+    ".agent/ModelRouting.md",
+    ".agent/Dev.md",
+    ".agent/Worktree.md",
+    ".agent/Delegation.md",
+    ".agent/ClaudeWorkflow.md"
+  ];
+  for (const relative of policyFiles) {
+    await writeFile(path.join(policyRoot, relative), `# ${relative}\n`);
+  }
+  await writeFile(repoPolicyFile, "# Project repository policy\n");
+
+  try {
+    const packet = await loadPolicyPacket(cwd, policyRoot, {
+      workspaceRoot,
+      repoPolicyFile
+    });
+    assert.equal(packet.root, policyRoot);
+    assert.equal(packet.workspaceRoot, workspaceRoot);
+    assert.equal(packet.repoPolicyFile, repoPolicyFile);
+    assert.deepEqual(packet.files, [
+      path.join(policyRoot, "CLAUDE.md"),
+      path.join(policyRoot, ".agent", "Glossary.md"),
+      path.join(policyRoot, ".agent", "ModelRouting.md"),
+      path.join(policyRoot, ".agent", "Dev.md"),
+      path.join(policyRoot, ".agent", "Worktree.md"),
+      repoPolicyFile,
+      path.join(policyRoot, ".agent", "Delegation.md"),
+      path.join(policyRoot, ".agent", "ClaudeWorkflow.md")
+    ]);
+    assert.match(packet.text, /Project repository policy/);
+  } finally {
+    await rm(workspaceRoot, { recursive: true, force: true });
+  }
+});
+
 test("stale queued reservations recover and policy symlinks are rejected", async () => {
   const stateDir = await mkdtemp(path.join(os.tmpdir(), "claude-bridge-recovery-test-"));
   const policyRoot = await mkdtemp(path.join(os.tmpdir(), "claude-bridge-policy-test-"));
@@ -233,6 +283,7 @@ test("stale queued reservations recover and policy symlinks are rejected", async
   const policyFiles = [
     "CLAUDE.md",
     ".agent/Glossary.md",
+    ".agent/ModelRouting.md",
     ".agent/Dev.md",
     ".agent/Worktree.md",
     ".agent/Delegation.md",
