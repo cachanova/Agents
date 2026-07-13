@@ -17,18 +17,36 @@ parallelism, lower cost, or independent judgment.
 Apply the ladder and exclusions in `ModelRouting.md`. Keep coordination,
 integration, release work, and any unclassified work in Sol at `high`.
 
+Parallelism and model choice are separate decisions. Use multiple Sol workers
+when independent lanes each require Sol-level judgment. Do not downgrade a lane
+only to diversify models or reduce cost.
+
 ## Claude specialists
 
-Invoke Opus or Fable through a supported Claude Code non-interactive command,
-the Claude Agent SDK, or a maintained wrapper. `claude mcp serve` exposes Claude
-Code tools, not model reasoning.
+Use the `claude-bridge` MCP server when available:
 
-Mark every Claude call `DELEGATED_TASK`. Select `--model opus` for an Opus task
-and `--model fable` for a Fable task. Give the worker a compact evidence packet
-and an explicit stop condition.
+1. `claude_start` begins a delegated job.
+2. `claude_status` checks state and activity; `claude_result` returns the answer.
+3. `claude_reply` forks a finished session for a follow-up.
+4. `claude_cancel` stops work that is no longer useful.
+5. `claude_jobs` recovers detached work and `claude_forget` deletes local state.
+Use `claude_health` when authentication or availability is uncertain. The bridge
+adds the delegation envelope, blocks recursive agents, runs read-only plan mode,
+uses Claude subscription authentication, and disables web tools by default.
+`claude mcp serve` exposes Claude Code tools, not model reasoning.
 
-Claude and OpenAI usage are billed or quota-limited separately. Do not expose an
-API credential to the subprocess unless the user chose API billing.
+For `claude_start`, set `model` to `opus` or `fable` according to
+`ModelRouting.md` and set `effort` explicitly. Pass the initialized Agents
+submodule as `policy_root`. For sibling-worktree layouts, also pass the parent
+container as `workspace_root` and the main worktree's regular project
+`.agent/Repo.md` as `repo_policy_file`. The bridge marks the call
+`DELEGATED_TASK`. Give the worker a compact evidence packet and an explicit stop
+condition.
+
+Claude and OpenAI usage are quota-limited separately. This bridge never forwards
+API billing credentials, but Claude may consume paid extra-usage credits when
+that account feature is enabled. A follow-up is post-completion, not live
+mid-turn steering.
 
 ## Orchestration preset
 
