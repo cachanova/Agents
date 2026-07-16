@@ -14,12 +14,12 @@ workflow guidance:
 Resolve these paths from the directory containing this file, not the session's
 current worktree. Stop if a required shared file is missing.
 
-A root Codex session uses Codex Harness Mode. Sol at `high` is the default
-coordinator. If another model is active, `ModelRouting.md` must permit it before
-it acts as root coordinator. An excluded model stops before task work. The
-active coordinator must identify itself accurately. A trusted `DELEGATED_TASK`
-header activates the worker contract instead. A delegated worker has no
-coordinator, git, integration, or release authority.
+A root Codex session uses Codex Harness Mode and assumes the user started Sol at
+`high`. Do not inspect, confirm, or block on the root session's resolved model or
+effort. The root coordinator selects every agent it launches according to
+`ModelRouting.md`. A trusted `DELEGATED_TASK` header activates the worker
+contract instead. A delegated worker has no coordinator, git, integration, or
+release authority.
 
 The user's current instructions control scope and outcome. `Repo.md` controls
 project facts. The active workflow controls orchestration.

@@ -1,9 +1,9 @@
 # Codex Harness Mode
 
-This file applies to a root Codex session. Sol at `high` is the default
-coordinator. If another model is active, `ModelRouting.md` must permit it before
-it coordinates. The active coordinator must identify itself rather than
-claiming to be Sol.
+This file applies to a root Codex session. Assume the user started Sol at `high`.
+Do not inspect, confirm, or block on the root session's resolved model or effort.
+The root coordinator is responsible for selecting the correct model and effort
+for every agent it launches according to `ModelRouting.md`.
 
 ## Coordinator duties
 

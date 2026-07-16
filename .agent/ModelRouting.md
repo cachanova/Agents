@@ -12,13 +12,15 @@ user-selected Claude Harness session may use Fable as its root coordinator.
 
 ## Selection
 
-The allowed model set is Terra, Opus, Sol, and Fable. Every invocation must name
-one of these models. Claude Code calls may use the `opus` and `fable` aliases
-because each alias stays within one allowed model family.
+The allowed model set is Terra, Opus, Sol, and Fable. A root Codex session
+assumes Sol at `high` and does not inspect or confirm its own resolved model or
+effort. The root coordinator must explicitly select an allowed model and effort
+for every agent it launches. Claude Code calls may use the `opus` and `fable`
+aliases because each alias stays within one allowed model family.
 
 Do not use `default`, `best`, `opusplan`, or another selector whose resolved
-model is unknown. Confirm the resolved model before task work when the interface
-exposes that metadata.
+model is unknown. The coordinator owns routing from the launch parameters;
+delegated agents do not self-confirm their model identity before task work.
 
 ## Boundaries
 
