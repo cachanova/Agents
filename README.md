@@ -21,9 +21,11 @@ The active harness selects the workflow. Codex reads `AGENTS.md`; Claude Code
 reads `CLAUDE.md`. A delegated agent remains a worker even when its native
 harness would normally make it the coordinator.
 
-Codex Harness Mode uses Sol at `high` as its default coordinator. A user may
-start in Claude Harness Mode with Fable as coordinator; Fable delegates
-implementation to Codex Sol at `high` by default.
+Codex Harness Mode assumes the user started Sol at `high`; the root session does
+not self-confirm its model identity or effort. The Sol coordinator explicitly
+selects the model and effort for every agent it launches. A user may start in
+Claude Harness Mode with Fable as coordinator; Fable delegates implementation
+to Codex Sol at `high` by default.
 
 ## Add to a project
 
