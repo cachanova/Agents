@@ -1,14 +1,16 @@
 # Agent Rules
 
-Shared rules for Claude Code and Codex. Read in order before any work:
+Shared rules for Claude Code and Codex. This file lives at
+`~/agents/AGENTS.md`, regardless of the current directory. Read in order
+before any work:
 
-1. `Startup.md`
-2. `Git.md`
-3. `Dev.md`
-4. `Plans.md`
-5. `Memory.md`
+1. `~/agents/Startup.md`
+2. `~/agents/Git.md`
+3. `~/agents/Dev.md`
+4. `~/agents/Plans.md`
+5. `~/agents/Memory.md`
 
-Paths are relative to this file. Stop if one is missing.
+Stop if one of these shared files is missing.
 
-Precedence: the user's instructions, then the project's root `AGENTS.md`,
-then these files.
+Precedence: the user's instructions, then the project's root `AGENTS.md`
+when working in a project, then these files.
