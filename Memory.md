@@ -1,33 +1,27 @@
 # Memory (Rumi)
 
-Long-term memory lives on Rumi via the `basic-memory-mozi` MCP server, never
-on this machine. Do not create local memory files or symlinks.
+Long-term memory is Rumi, via the `basic-memory-mozi` MCP server. Never local.
+No local memory files or symlinks.
 
-## Reading
+## Read
 
-- At session start make one `recall_derived_memory` call about the task
-  topic. It is free, Hindsight-backed, and returns facts consolidated across
-  every note in the bank. It defaults to the current repo's bank.
-- Use `search_notes` and `read_note` for specific notes and exact wording.
-- Query the `leela` project for user preferences when relevant.
-- Recall lags the markdown by up to an hour. For anything written this session
-  or very recently, use `search_notes`.
+- Session start: one `recall_derived_memory` call on the task topic. Free,
+  consolidated across the bank, defaults to the current repo's bank.
+- `search_notes` and `read_note` for specific notes and exact wording.
+- Query project `leela` for user preferences.
+- Recall lags up to an hour. For recent writes, use `search_notes`.
 
-## Writing
+## Write
 
-- Store durable facts and decisions with `write_note`. The proxy routes and
-  tags them.
-- Projects ending in `-private` are write-only here. Never read them; ask Rumi
-  instead. Recall refuses them too.
+- Durable facts and decisions: `write_note`. The proxy routes and tags.
+- `-private` projects are write-only. Never read them; ask Rumi.
 
 ## Routing
 
-- Topic overrides cwd. Anything about the Theseus homelab and what runs there
-  (mozi, the media server, Rumi/Hermes, kosha storage, Proxmox, home
-  networking) lives in the `theseus` project. Pass `project="theseus"` on
-  searches and `write_note` for those topics, whatever repo you are in.
-- For a genuinely new project or line of work, check `list_memory_projects`
-  first, then `create_memory_project` with a lowercase-slug name. Do not wedge
-  notes into an old project or a general folder under `leela`.
-- Name a new code repo's project after the repo directory so sessions in that
-  repo scope to it automatically.
+- Topic beats cwd. Theseus homelab and everything on it (mozi, media server,
+  Rumi/Hermes, kosha, Proxmox, home network) goes to project `theseus`. Pass
+  `project="theseus"` explicitly.
+- New line of work with no fitting project: check `list_memory_projects`,
+  then `create_memory_project` with a lowercase slug. Do not wedge it into an
+  old project or a general folder under `leela`.
+- New code repo: name the project after the repo directory.

@@ -1,7 +1,6 @@
-# Agent Entry Point
+# Agent Rules
 
-Shared rules for Claude Code and Codex. Read these before changing code, running
-project commands, or giving workflow guidance:
+Shared rules for Claude Code and Codex. Read in order before any work:
 
 1. `Startup.md`
 2. `Git.md`
@@ -9,9 +8,7 @@ project commands, or giving workflow guidance:
 4. `Plans.md`
 5. `Memory.md`
 
-Resolve these paths from the directory containing this file. Stop if one is
-missing.
+Paths are relative to this file. Stop if one is missing.
 
-Project-specific facts live in the project's root `AGENTS.md` (see `Startup.md`).
-The user's current instructions control scope and outcome; the project `AGENTS.md` controls
-project facts; these files control how work is done.
+Precedence: the user's instructions, then the project's root `AGENTS.md`,
+then these files.

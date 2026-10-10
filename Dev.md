@@ -1,106 +1,97 @@
-# Development Rules
+# Development
 
 ## Scope
 
-- Inspect the relevant code and current state before proposing or making a
-  change.
-- Make the smallest direct change that completes the requested outcome.
-- Preserve unrelated user work. Do not clean up outside the task.
-- Ask before an action that materially expands scope, changes external state,
-  or needs a product decision the user has not made.
-- Choose an approach and commit to it. Revisit it only when new information
-  contradicts the reasoning behind it.
-- When making a judgment call (naming, structure, test approach): state the
-  intent briefly, then proceed. Record it in the plan file when working a plan.
-- If you find an unrelated issue (bug, stale code, missing test), tell the
-  user and move on. Do not fix it unasked.
+- Inspect the code and current state before changing it.
+- Make the smallest direct change that completes the request.
+- Leave unrelated work alone.
+- Ask before expanding scope, changing external state, or making a product
+  decision the user has not made.
+- Pick an approach and commit. Revisit only on contradicting evidence.
+- Judgment calls (naming, structure, tests): state the intent in one line,
+  proceed. Record it in the plan file when working a plan.
+- Unrelated issue found: tell the user, move on.
 
 ## One implementation
 
-- Modify the canonical implementation in place.
-- No shadow modules, duplicate helpers, alternate endpoints, or parallel code
-  paths.
-- New behavior is live by default. No feature flags, environment gates, dead
-  branches, or commented alternatives unless the user asks.
-- No compatibility shims, deprecated aliases, dual behavior, or silent
-  fallbacks by default. Update callers and remove the replaced path together.
-- Fail clearly when required input is missing.
+- Change the canonical code in place.
+- No shadow modules, duplicate helpers, alternate endpoints, parallel paths.
+- New behavior is live. No flags, env gates, dead branches, or commented
+  alternatives unless asked.
+- No shims, deprecated aliases, dual behavior, or silent fallbacks. Update
+  callers and delete the old path together.
+- Fail clearly on missing required input.
 
 ## Verification
 
-- Reproduce a defect before fixing it. For a regression, add a test that fails
-  for the reported reason before changing the code.
-- Trace real callers, payloads, and contracts. Do not infer them from names.
-- Run focused tests for the changed area, plus lint and typecheck. Run broader
-  checks when the change touches shared contracts or release behavior.
-- Trust test output, typechecks, builds, diffs, logs, and runtime checks over a
-  model's self-review.
-- Fix a failed required check and rerun it. Do not call a failure harmless.
-- Solve the general problem. Do not hardcode values, special-case the test
-  inputs, or write helper scripts that only make the given tests pass. If a test
-  is wrong or the task is infeasible, say so instead of working around it.
-- On a test failure: attempt a fix, show the diff, and let the user approve
-  before committing.
+- Reproduce a defect before fixing it. For a regression, write the failing
+  test first.
+- Trace real callers, payloads, and contracts. Do not infer from names.
+- Run focused tests, lint, and typecheck. Run broader checks when shared
+  contracts or release behavior change.
+- Trust test output, builds, diffs, logs, and runtime checks over self-review.
+- Fix a failed required check and rerun it. Never call a failure harmless.
+- Solve the general problem. No hardcoded values, special-cased test inputs, or
+  helper scripts that only pass the given tests. If a test is wrong or the task
+  is infeasible, say so.
+- Test failure: fix, show the diff, get approval before committing.
 - Report every check that did not run or did not pass.
 
 ## Build and test output
 
-- Redirect verbose output to a log file: `make -j10 > /tmp/build_<repo>.log 2>&1`.
-- Run builds and tests in the background and keep working.
-- Read the log only on failure. Use `tail` to check progress on long runs.
-- Run the project's formatter or linter before presenting changes.
-- Delete any scratch scripts, temporary files, or helpers you created for
-  iteration before finishing.
+- Redirect verbose output: `make -j10 > /tmp/build_<repo>.log 2>&1`.
+- Run builds and tests in the background. Keep working.
+- Read the log only on failure. `tail` for progress.
+- Run the project formatter or linter before presenting changes.
+- Delete scratch files and helper scripts you created before finishing.
 
 ## Tool calls
 
-- When several tool calls are independent, make them in parallel in one message.
-- When a call depends on an earlier result, run it after that result arrives.
-  Never guess or placeholder a parameter.
+- Independent calls go in parallel, in one message.
+- Dependent calls wait for their inputs. Never guess or placeholder a
+  parameter.
 
 ## Performance
 
-- Evaluate memory, CPU, latency, I/O, network volume, and connection use at
-  full scale, not on samples.
-- Stream, batch, chunk, or paginate large work. Push filtering and aggregation
-  into the data store when that reduces transfer or memory.
-- Bound queues, caches, concurrency, retries, and intermediate data. Avoid full
-  in-memory joins and unnecessary copies.
-- State a material resource tradeoff and recommend the lower sustained-cost
-  design.
+- Evaluate memory, CPU, latency, I/O, network, and connections at full scale.
+- Stream, batch, chunk, or paginate. Push filtering and aggregation into the
+  data store.
+- Bound queues, caches, concurrency, retries, intermediate data. No full
+  in-memory joins or needless copies.
+- State a material resource tradeoff. Recommend the lower sustained cost.
 
 ## Secrets
 
-- Use the project's configured secrets manager. Never put credentials in code,
-  docs, prompts, logs, command output, or tracked environment files.
-- Do not invent a missing credential. Stop and report what the project needs.
-- If a secret is exposed, stop using it and report the required rotation.
+- Use the project's secrets manager. No credentials in code, docs, prompts,
+  logs, output, or tracked env files.
+- Never invent a credential. Stop and report what is needed.
+- Exposed secret: stop using it, report the rotation.
 
 ## System changes
 
-- Minor package installs (pip, npm, cargo) are fine.
-- System packages or global config changes: ask first.
+- Minor package installs (pip, npm, cargo): go ahead.
+- System packages or global config: ask first.
 
 ## Communication
 
-- Say in one line what you are about to do before the first tool call.
+- One line on what you are about to do before the first tool call.
 - Lead with the result, decision, or blocker.
-- Keep plans and progress updates short. Put status notes in the same message as
-  the next tool call rather than ending the turn to report.
+- Short updates. Put status notes in the same message as the next tool call;
+  do not end the turn to report.
 - Separate verified facts from inference.
-- When handing work back, link the changed files and name the checks that ran.
+- Handing back: link changed files, name the checks that ran.
 
 ## Finishing
 
-A message with no tool call ends the turn, and work stops there. Do not end a
-turn while work you were asked for is still owed. Four stops to avoid:
+A message with no tool call ends the turn. Do not end a turn with work still
+owed. Four stops to avoid:
 
-- A summary that announces the next step instead of taking it.
-- An offer to continue unless the user would prefer otherwise.
-- A list of decisions for the user when none of them blocks the remaining work.
-  Give your recommendation and carry on with what does not depend on the answer.
-- Stopping because a milestone is done or the turn has been long.
+- A summary that announces the next step instead of doing it.
+- An offer to continue unless the user prefers otherwise.
+- A list of decisions when none blocks the remaining work. Recommend, then
+  continue with what does not depend on the answer.
+- Stopping because a milestone is done or the turn ran long.
 
-Stop only when nothing can move without the user, when the blocker is
-deliberately protected from you, or when the task is complete and verified.
-This does not override asking before risky or destructive actions.
+Stop only when nothing can move without the user, the blocker is deliberately
+protected from you, or the task is complete and verified. Still ask before
+risky or destructive actions.

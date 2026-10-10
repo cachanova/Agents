@@ -1,32 +1,32 @@
 # <Project>
 
 Shared rules live in `~/agents`. This file holds only <Project> facts.
-Copy it to the repo root as `AGENTS.md` and add `CLAUDE.md -> AGENTS.md`.
+Save as the repo's root `AGENTS.md`; add `CLAUDE.md -> AGENTS.md`.
 
 ## Repository
 
 - Purpose:
 - Default branch and merge strategy (if not squash):
-- Source-of-truth documents:
+- Source-of-truth docs:
 
 ## Development
 
-- Package managers and required versions:
-- Build, test, lint, format, and typecheck commands:
+- Toolchains and versions:
+- Build, test, lint, format, typecheck commands:
 - Local services and URLs:
 - Performance constraints:
 
 ## Credentials
 
 - Secrets manager:
-- Approved runtime loading method:
+- Runtime loading method:
 
 ## Release
 
 - PR requirements:
-- Deployment commands and documentation:
+- Deploy commands and docs:
 - Production verification:
 
 ## Special rules
 
-- Project-specific behavior or narrowings of the shared policy.
+- Project-specific behavior or narrowings of shared rules.
