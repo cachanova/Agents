@@ -19,15 +19,17 @@ Result:
   .git             file: gitdir: ./.bare
   main/            worktree for the default branch, and only that branch
   <branch>/        one worktree per feature branch
-  CLAUDE.md  -> main/.agent/Repo.md
-  AGENTS.md  -> main/.agent/Repo.md
+  CLAUDE.md  -> main/AGENTS.md
+  AGENTS.md  -> main/AGENTS.md
 ```
 
 - Worktree directory name equals the branch name. Branch names contain no
   slashes.
-- Project rules live in `.agent/Repo.md`, tracked in the repo. The workspace
-  root symlinks point at `main`'s copy so every worktree inherits them.
-- Never create `CLAUDE.md`, `AGENTS.md`, or `.claude/` inside a worktree.
+- Project rules live in a tracked root `AGENTS.md`, with `CLAUDE.md` a tracked
+  symlink to it. The workspace root symlinks point at `main`'s copy for
+  sessions started from the workspace root.
+- Never create a `.claude/` directory or any other agent config inside a
+  worktree.
 - Git commands work from the workspace root because of the `.git` file.
 - Fix a workspace that deviates from this layout (missing `.git` file, missing
   root symlinks) when you notice it. Moving a bare dir or worktree is a user
@@ -55,7 +57,7 @@ Result:
 - Follow the repo's commit message style; check recent `git log`.
 - Amend the previous commit when the change is an obvious continuation (typo,
   minor follow-up). Otherwise make a new commit.
-- If a change alters a project fact in `.agent/Repo.md` or a doc under `docs/`,
+- If a change alters a project fact in `AGENTS.md` or a doc under `docs/`,
   update it in the same commit.
 
 ## Land work
@@ -67,7 +69,7 @@ Result:
 - Open the PR with `gh`. Report the PR, branch, purpose, checks run, and
   unresolved risks.
 - Merge only on explicit user confirmation. Sync once more before merging.
-  PRs are squash-merged unless `Repo.md` says otherwise.
+  PRs are squash-merged unless the project `AGENTS.md` says otherwise.
 
 ## After merge
 

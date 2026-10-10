@@ -7,9 +7,9 @@ Do these in order at the start of every session:
 2. **Find the workspace.** `WORKSPACE=$(git rev-parse --path-format=absolute --git-common-dir | sed 's|/\.bare$||')`.
    In a bare-repo workspace this is the directory holding `.bare/`, `main/`,
    and the branch worktrees. In a normal checkout it is the repo root.
-3. **Read project rules.** Read `$WORKSPACE/main/.agent/Repo.md` if it exists
-   (the workspace root's `CLAUDE.md` and `AGENTS.md` are symlinks to it). In a
-   normal checkout read `.agent/Repo.md`.
+3. **Read project rules.** Read the worktree's root `AGENTS.md` if it exists
+   (`CLAUDE.md` is a symlink to it). The workspace root's `AGENTS.md` and
+   `CLAUDE.md` are symlinks to `main/AGENTS.md`.
 4. **Read the plan.** If the task works through a plan file, read it and its
    campaign marker (see `Plans.md`) before doing anything else.
 

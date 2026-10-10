@@ -13,7 +13,7 @@ Git.md                    Bare-repo workspace layout, worktrees, PR flow
 Dev.md                    Scope, verification, performance, secrets, comms
 Plans.md                  Plan files and the campaign status marker
 Memory.md                 Rumi memory rules
-Repo.template.md          Template for a project's .agent/Repo.md
+Repo.template.md          Template for a project's root AGENTS.md
 ```
 
 ## Wiring
@@ -27,19 +27,20 @@ into it:
 ```
 
 Projects do not vendor this repo. Each project keeps its own facts in a tracked
-`.agent/Repo.md`, and the workspace root links to `main`'s copy:
+root `AGENTS.md` (with `CLAUDE.md -> AGENTS.md`), and the workspace root links
+to `main`'s copy:
 
 ```text
 ~/code/<repo>/
   .bare/  .git  main/  <branch>/
-  CLAUDE.md -> main/.agent/Repo.md
-  AGENTS.md -> main/.agent/Repo.md
+  CLAUDE.md -> main/AGENTS.md
+  AGENTS.md -> main/AGENTS.md
 ```
 
-See `Git.md` for how to create a workspace and
-`Repo.template.md` to start a `Repo.md`.
+See `Git.md` for how to create a workspace and `Repo.template.md` to start a
+project `AGENTS.md`.
 
 ## Editing
 
-Keep each rule in one file. Use short commands. Put project facts in `Repo.md`,
+Keep each rule in one file. Use short commands. Put project facts in the project `AGENTS.md`,
 not here. Avoid rationale unless it changes a decision.

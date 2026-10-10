@@ -1,7 +1,7 @@
-# Repository Rules
+# <Project>
 
-Record only facts and rules specific to this project. Do not repeat shared
-policy from `~/agents`.
+Shared rules live in `~/agents`. This file holds only <Project> facts.
+Copy it to the repo root as `AGENTS.md` and add `CLAUDE.md -> AGENTS.md`.
 
 ## Repository
 

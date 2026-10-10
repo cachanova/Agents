@@ -12,6 +12,6 @@ project commands, or giving workflow guidance:
 Resolve these paths from the directory containing this file. Stop if one is
 missing.
 
-Project-specific facts live in the workspace's `Repo.md` (see `Startup.md`).
-The user's current instructions control scope and outcome; `Repo.md` controls
+Project-specific facts live in the project's root `AGENTS.md` (see `Startup.md`).
+The user's current instructions control scope and outcome; the project `AGENTS.md` controls
 project facts; these files control how work is done.
