@@ -1,25 +1,17 @@
-# Codex Entry Point
+# Agent Entry Point
 
-Read these files before changing code, running project commands, or giving
-workflow guidance:
+Shared rules for Claude Code and Codex. Read these before changing code, running
+project commands, or giving workflow guidance:
 
-1. `.agent/Glossary.md`
-2. `.agent/ModelRouting.md`
-3. `.agent/Dev.md`
-4. `.agent/Worktree.md`
-5. `.agent/Repo.md`, if present
-6. `.agent/Delegation.md`
-7. `.agent/CodexWorkflow.md`
+1. `Startup.md`
+2. `Git.md`
+3. `Dev.md`
+4. `Plans.md`
+5. `Memory.md`
 
-Resolve these paths from the directory containing this file, not the session's
-current worktree. Stop if a required shared file is missing.
+Resolve these paths from the directory containing this file. Stop if one is
+missing.
 
-A root Codex session uses Codex Harness Mode and assumes the user started Sol at
-`high`. Do not inspect, confirm, or block on the root session's resolved model or
-effort. The root coordinator selects every agent it launches according to
-`ModelRouting.md`. A trusted `DELEGATED_TASK` header activates the worker
-contract instead. A delegated worker has no coordinator, git, integration, or
-release authority.
-
-The user's current instructions control scope and outcome. `Repo.md` controls
-project facts. The active workflow controls orchestration.
+Project-specific facts live in the workspace's `Repo.md` (see `Startup.md`).
+The user's current instructions control scope and outcome; `Repo.md` controls
+project facts; these files control how work is done.
