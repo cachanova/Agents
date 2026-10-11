@@ -2,7 +2,7 @@
 
 In order, every session:
 
-1. One `recall_derived_memory` call on the task topic. See `Memory.md`.
+1. One `recall_derived_memory` call on the task topic.
 2. When working in a Git repository, find the workspace:
    `WORKSPACE=$(git rev-parse --path-format=absolute --git-common-dir | sed 's|/\.bare$||')`
    Then read the worktree's root `AGENTS.md`. Skip this step outside a Git
