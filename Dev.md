@@ -42,14 +42,21 @@
 - Redirect verbose output: `make -j10 > /tmp/build_<repo>.log 2>&1`.
 - Run builds and tests in the background. Keep working.
 - Read the log only on failure. `tail` for progress.
+- Spread focused suites across workers when the project supports it
+  (`pytest -n auto`, `make -j`).
 - Run the project formatter or linter before presenting changes.
 - Delete scratch files and helper scripts you created before finishing.
 
 ## Tool calls
 
-- Independent calls go in parallel, in one message.
+- Independent calls go in parallel, in one message. Plan the reads, searches,
+  and checks a step needs and send them together; every extra turn costs
+  model time.
 - Dependent calls wait for their inputs. Never guess or placeholder a
   parameter.
+- Wait on CI, deploys, and remote jobs with one background command that exits
+  when the state changes (`gh pr checks --watch`, an `until` loop). No
+  foreground `sleep` polling.
 
 ## Performance
 
@@ -75,6 +82,8 @@
 ## Communication
 
 - One line on what you are about to do before the first tool call.
+- Ask the user's open questions together, up front, then keep working on what
+  does not depend on the answers.
 - Lead with the result, decision, or blocker.
 - Short updates. Put status notes in the same message as the next tool call;
   do not end the turn to report.
