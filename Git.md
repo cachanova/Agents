@@ -54,10 +54,10 @@ git worktree add main main
 
 - "Put this on main" means open a PR. Push directly only when told to push.
 - Before the PR: integrate the default branch, resolve conflicts in the
-  feature worktree, rerun verification, remove superseded code.
+  feature worktree, rerun the relevant local tests, remove superseded code.
 - Open with `gh`. Report PR, branch, purpose, checks, open risks.
-- Merge only on explicit confirmation. Sync first. Squash unless the project
-  `AGENTS.md` says otherwise.
+- Merge only on explicit confirmation. Sync first. With CI, merge only after
+  required checks pass. Squash unless the project `AGENTS.md` says otherwise.
 
 ## After merge
 
