@@ -13,6 +13,8 @@ Dev.md                    Scope, verification, performance, secrets, comms
 Plans.md                  Plan files and the campaign marker
 Memory.md                 Rumi memory
 Repo.template.md          Template for a project's root AGENTS.md
+bin/worktree-sweep        Remove merged or stale worktrees
+systemd/                  Daily user timer for worktree-sweep
 ```
 
 ## Wiring
@@ -20,6 +22,14 @@ Repo.template.md          Template for a project's root AGENTS.md
 ```text
 ~/.claude/CLAUDE.md -> ~/agents/CLAUDE.md
 ~/.codex/AGENTS.md  -> ~/agents/AGENTS.md
+```
+
+Worktree sweep, once per machine:
+
+```bash
+ln -s ~/agents/systemd/worktree-sweep.{service,timer} ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now worktree-sweep.timer
 ```
 
 Projects do not vendor this repo. Each keeps a tracked root `AGENTS.md`

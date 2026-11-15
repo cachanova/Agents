@@ -66,6 +66,18 @@ git worktree add main main
 - `git -C $WORKSPACE branch -d <branch>` and delete the remote branch.
 - Only after the merge is confirmed.
 
+## Cleanup
+
+- Finish a task with no worktree left for merged or abandoned work.
+- Commit and push work worth keeping. Unpushed work in an idle worktree is
+  lost.
+- `worktree-sweep` runs daily as a systemd user timer. It removes worktrees
+  and local branches that are merged (including squash-merged PRs) or idle
+  21 days. It keeps the main worktree, dirty worktrees, locked worktrees, and
+  worktrees a process is using.
+- Keep an idle worktree with `git worktree lock <path>`.
+- Preview: `~/agents/bin/worktree-sweep`. Remove: add `--apply`.
+
 ## Parallel work
 
 - One writer per worktree.

@@ -1,0 +1,8 @@
+[Unit]
+Description=Remove merged or stale Git worktrees (~/agents/bin/worktree-sweep)
+
+[Service]
+Type=oneshot
+ExecStart=%h/agents/bin/worktree-sweep --apply --days 21
+Nice=10
+IOSchedulingClass=idle
