@@ -27,8 +27,11 @@
 - Reproduce a defect before fixing it. For a regression, write the failing
   test first.
 - Trace real callers, payloads, and contracts. Do not infer from names.
-- Run focused tests, lint, and typecheck. Run broader checks when shared
-  contracts or release behavior change.
+- Locally, run only the tests relevant to the change, plus lint and typecheck.
+- Project has CI: CI runs the full suite and gates the merge. Do not run the
+  full suite locally.
+- No CI: also run broader checks locally when shared contracts or release
+  behavior change.
 - Trust test output, builds, diffs, logs, and runtime checks over self-review.
 - Fix a failed required check and rerun it. Never call a failure harmless.
 - Solve the general problem. No hardcoded values, special-cased test inputs, or
