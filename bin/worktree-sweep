@@ -1,0 +1,199 @@
+#!/usr/bin/env bash
+# worktree-sweep: remove Git worktrees whose work is merged or abandoned.
+#
+# A linked worktree is removed, together with its local branch, when either:
+#   merged  its HEAD is in the head of a merged GitHub PR for the same branch
+#           (squash merges), or in the default branch and idle for two days
+#           (a fresh worktree with no commits yet also sits on the default
+#           branch, so it gets the grace period)
+#   stale   nothing changed for --days days (commits, index, HEAD, files)
+#
+# Always kept: the main worktree, the default branch, locked worktrees,
+# worktrees with uncommitted or untracked changes, worktrees in use by a
+# running process, and detached worktrees that are not merged.
+#
+# Dry run by default; pass --apply to remove. Remote branches are untouched.
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: worktree-sweep [--apply] [--days N] [--quiet] [REPO_OR_WORKSPACE...]
+
+Defaults: dry run, 21 days, every repository or workspace directly under
+~/code plus repositories owning worktrees under ~/.t3/worktrees.
+Protect a worktree with: git worktree lock <path>
+EOF
+}
+
+apply=0 days=21 quiet=0
+roots=()
+while (($#)); do
+  case $1 in
+    --apply) apply=1 ;;
+    --days) days=${2:?--days needs a value}; shift ;;
+    --quiet) quiet=1 ;;
+    -h|--help) usage; exit 0 ;;
+    -*) echo "worktree-sweep: unknown option $1" >&2; usage >&2; exit 2 ;;
+    *) roots+=("$1") ;;
+  esac
+  shift
+done
+[[ $days =~ ^[0-9]+$ ]] || { echo "worktree-sweep: --days must be a number" >&2; exit 2; }
+
+lock="${XDG_RUNTIME_DIR:-/tmp}/worktree-sweep.$(id -u).lock"
+exec 9>"$lock"
+flock -n 9 || { echo "worktree-sweep: another run is active" >&2; exit 0; }
+
+now=$(date +%s)
+cutoff=$((now - days * 86400))
+grace=$((now - 2 * 86400))
+mode=$([[ $apply == 1 ]] && echo remove || echo would-remove)
+removed=0 kept=0
+
+say()  { echo "$*"; }
+info() { [[ $quiet == 1 ]] || echo "$*"; }
+
+# Collect candidate repositories.
+if ((${#roots[@]} == 0)); then
+  for d in "$HOME"/code/*/; do roots+=("${d%/}"); done
+  for d in "$HOME"/.t3/worktrees/*/*/; do [[ -e $d/.git ]] && roots+=("${d%/}"); done
+fi
+
+declare -A seen=()
+repos=()
+for r in "${roots[@]}"; do
+  [[ -d $r ]] || continue
+  common=$(git -C "$r" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || continue
+  [[ -n ${seen[$common]:-} ]] && continue
+  seen[$common]=1
+  repos+=("$common")
+done
+
+# Newest mtime of non-ignored, uncommitted-or-tracked files is costly on big
+# trees; index, HEAD, and reflog mtimes plus the last commit cover activity.
+last_activity() {
+  local wt=$1 admin=$2 t latest=0
+  t=$(git -C "$wt" log -1 --format=%ct 2>/dev/null || echo 0)
+  ((t > latest)) && latest=$t
+  for f in "$admin/index" "$admin/HEAD" "$admin/logs/HEAD"; do
+    [[ -e $f ]] || continue
+    t=$(stat -c %Y "$f")
+    ((t > latest)) && latest=$t
+  done
+  echo "$latest"
+}
+
+in_use() {
+  local wt=$1 p cwd
+  for p in /proc/[0-9]*; do
+    cwd=$(readlink "$p/cwd" 2>/dev/null) || continue
+    [[ $cwd == "$wt" || $cwd == "$wt"/* ]] && return 0
+  done
+  return 1
+}
+
+github_slug() {
+  local url
+  url=$(git --git-dir="$1" remote get-url origin 2>/dev/null) || return 1
+  [[ $url =~ github\.com[:/]([^/]+/[^/]+)$ ]] || return 1
+  echo "${BASH_REMATCH[1]%.git}"
+}
+
+for common in "${repos[@]}"; do
+  g=(git --git-dir="$common")
+  "${g[@]}" fetch -q --prune origin 2>/dev/null || info "note: fetch failed for $common"
+  default=$("${g[@]}" symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)
+  if [[ -z $default ]]; then
+    for b in origin/main origin/master; do
+      "${g[@]}" rev-parse -q --verify "$b" >/dev/null && { default=$b; break; }
+    done
+  fi
+  [[ -n $default ]] || { info "skip $common: no default branch"; continue; }
+  default_name=${default#origin/}
+
+  # branch -> merged PR head SHAs
+  declare -A pr_heads=()
+  if slug=$(github_slug "$common") && command -v gh >/dev/null; then
+    while IFS=$'\t' read -r ref oid; do
+      [[ -n $ref ]] && pr_heads[$ref]+="$oid "
+    done < <(gh pr list -R "$slug" --state merged --limit 1000 \
+               --json headRefName,headRefOid -q '.[] | [.headRefName, .headRefOid] | @tsv' 2>/dev/null || true)
+  fi
+
+  [[ $apply == 1 ]] && "${g[@]}" worktree prune
+  first=1 wt="" head="" branch="" locked=0 bare=0
+  entries=()
+  while IFS= read -r line; do
+    case $line in
+      "worktree "*) wt=${line#worktree } ;;
+      "HEAD "*) head=${line#HEAD } ;;
+      "branch "*) branch=${line#branch refs/heads/} ;;
+      "locked"*) locked=1 ;;
+      "bare") bare=1 ;;
+      "")
+        if [[ -n $wt ]]; then
+          entries+=("$wt|$head|$branch|$locked|$bare|$first")
+          first=0
+        fi
+        wt="" head="" branch="" locked=0 bare=0
+        ;;
+    esac
+  done < <("${g[@]}" worktree list --porcelain; echo)
+
+  for e in "${entries[@]}"; do
+    IFS='|' read -r wt head branch locked bare isfirst <<<"$e"
+    [[ $bare == 1 ]] && continue
+    # A non-bare repository's first entry is its main worktree.
+    [[ $isfirst == 1 && $(git --git-dir="$common" rev-parse --is-bare-repository) == false ]] && continue
+    [[ $branch == "$default_name" ]] && continue
+    label="$wt${branch:+ [$branch]}"
+    if [[ $locked == 1 ]]; then info "keep $label: locked"; kept=$((kept+1)); continue; fi
+    [[ -d $wt ]] || continue
+
+    reason=""
+    admin=$(git -C "$wt" rev-parse --path-format=absolute --git-dir)
+    last=$(last_activity "$wt" "$admin")
+    if [[ -n $branch && -n ${pr_heads[$branch]:-} ]]; then
+      for oid in ${pr_heads[$branch]}; do
+        if "${g[@]}" merge-base --is-ancestor "$head" "$oid" 2>/dev/null; then
+          reason="PR merged"; break
+        fi
+      done
+    fi
+    if [[ -z $reason ]] && ((last < grace)) \
+       && "${g[@]}" merge-base --is-ancestor "$head" "$default" 2>/dev/null; then
+      reason="merged into $default_name"
+    fi
+    if [[ -z $reason ]]; then
+      if ((last < cutoff)); then
+        [[ -n $branch ]] || { info "keep $label: detached and unmerged"; kept=$((kept+1)); continue; }
+        reason="stale $(( (now - last) / 86400 )) days"
+        unpushed=$("${g[@]}" rev-list --count "$head" --not --remotes 2>/dev/null || echo "?")
+        [[ $unpushed == 0 ]] || reason+=", $unpushed unpushed commits deleted"
+      fi
+    fi
+    [[ -n $reason ]] || continue
+
+    if [[ -n $(git -C "$wt" --no-optional-locks status --porcelain 2>/dev/null) ]]; then
+      say "keep $label: $reason but has uncommitted changes"; kept=$((kept+1)); continue
+    fi
+    if in_use "$wt"; then
+      say "keep $label: $reason but a process is using it"; kept=$((kept+1)); continue
+    fi
+
+    say "$mode $label: $reason"
+    if [[ $apply == 1 ]]; then
+      if "${g[@]}" worktree remove "$wt"; then
+        [[ -n $branch ]] && "${g[@]}" branch -D -q "$branch" || true
+        removed=$((removed+1))
+      else
+        say "error removing $wt"
+      fi
+    else
+      removed=$((removed+1))
+    fi
+  done
+  unset pr_heads
+done
+
+say "worktree-sweep: $mode $removed, kept $kept (cutoff ${days}d)"
